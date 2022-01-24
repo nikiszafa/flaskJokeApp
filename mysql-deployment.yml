@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+     containers:
+      - image: default-route-openshift-image-registry.apps.ocp.lab.cloudpak.site/labproj27/mysql:latest
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: flaskapi-secrets
+              key: db_root_password
+        ports:
+        - containerPort: 3306
+          name: db-container
+        volumeMounts:
+        - mountPath: /docker-entrypoint-initdb.d
+          name: cluster-volume
+     volumes:
+     - name: cluster-volume
+       persistentVolumeClaim:
+        claimName: mysql-pv-claim
+status: {}
